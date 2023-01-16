@@ -461,8 +461,12 @@ func (self *SElbListener) Stop() error {
 	return cloudprovider.ErrNotSupported
 }
 
-func (self *SElbListener) Sync(ctx context.Context, listener *cloudprovider.SLoadbalancerListenerCreateOptions) error {
-	return self.lb.region.SyncElbListener(self, listener)
+func (self *SElbListener) ChangeScheduler(ctx context.Context, opts *cloudprovider.ChangeListenerSchedulerOptions) error {
+	return cloudprovider.ErrNotImplemented
+}
+
+func (self *SElbListener) SetHealthCheck(ctx context.Context, opts *cloudprovider.ListenerHealthCheckOptions) error {
+	return cloudprovider.ErrNotImplemented
 }
 
 func (self *SElbListener) Delete(ctx context.Context) error {
@@ -598,10 +602,6 @@ func (self *SRegion) GetElbListenerRule(id string) (*SElbListenerRule, error) {
 
 func (self *SRegion) DeleteElbListener(id string) error {
 	return self.elbRequest("DeleteListener", map[string]string{"ListenerArn": id}, nil)
-}
-
-func (self *SRegion) SyncElbListener(listener *SElbListener, config *cloudprovider.SLoadbalancerListenerCreateOptions) error {
-	return nil
 }
 
 func (self *SRegion) UpdateRulesPriority(rules []cloudprovider.ICloudLoadbalancerListenerRule) error {

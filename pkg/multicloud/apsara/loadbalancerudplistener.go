@@ -278,8 +278,18 @@ func (region *SRegion) SyncLoadbalancerUDPListener(lb *SLoadbalancer, listener *
 	return err
 }
 
+/*
 func (listerner *SLoadbalancerUDPListener) Sync(ctx context.Context, lblis *cloudprovider.SLoadbalancerListenerCreateOptions) error {
 	return listerner.lb.region.SyncLoadbalancerUDPListener(listerner.lb, lblis)
+}
+*/
+
+func (self *SLoadbalancerUDPListener) ChangeScheduler(ctx context.Context, opts *cloudprovider.ChangeListenerSchedulerOptions) error {
+	return cloudprovider.ErrNotImplemented
+}
+
+func (self *SLoadbalancerUDPListener) SetHealthCheck(ctx context.Context, opts *cloudprovider.ListenerHealthCheckOptions) error {
+	return cloudprovider.ErrNotImplemented
 }
 
 func (listerner *SLoadbalancerUDPListener) GetClientIdleTimeout() int {

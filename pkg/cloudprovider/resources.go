@@ -754,7 +754,8 @@ type ICloudLoadbalancerListener interface {
 
 	Start() error
 	Stop() error
-	Sync(ctx context.Context, listener *SLoadbalancerListenerCreateOptions) error
+	ChangeScheduler(ctx context.Context, opts *ChangeListenerSchedulerOptions) error
+	SetHealthCheck(ctx context.Context, opts *ListenerHealthCheckOptions) error
 
 	Delete(ctx context.Context) error
 }

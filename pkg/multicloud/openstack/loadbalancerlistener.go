@@ -744,6 +744,7 @@ func (listener *SLoadbalancerListener) Stop() error {
 	return nil
 }
 
+/*
 func (listener *SLoadbalancerListener) Sync(ctx context.Context, lblis *cloudprovider.SLoadbalancerListenerCreateOptions) error {
 	// ensure listener status
 	err := waitLbResStatus(listener, 10*time.Second, 8*time.Minute)
@@ -759,6 +760,15 @@ func (listener *SLoadbalancerListener) Sync(ctx context.Context, lblis *cloudpro
 		return errors.Wrap(err, `waitLbResStatus(listener, 10*time.Second, 8*time.Minute)`)
 	}
 	return nil
+}
+*/
+
+func (self *SLoadbalancerListener) ChangeScheduler(ctx context.Context, opts *cloudprovider.ChangeListenerSchedulerOptions) error {
+	return cloudprovider.ErrNotImplemented
+}
+
+func (self *SLoadbalancerListener) SetHealthCheck(ctx context.Context, opts *cloudprovider.ListenerHealthCheckOptions) error {
+	return cloudprovider.ErrNotImplemented
 }
 
 func (listener *SLoadbalancerListener) GetProjectId() string {

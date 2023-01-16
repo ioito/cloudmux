@@ -540,18 +540,12 @@ func (self *SElbListener) Stop() error {
 	return cloudprovider.ErrNotSupported
 }
 
-// https://support.huaweicloud.com/api-elb/zh-cn_topic_0096561544.html
-/*
-default_pool_id有如下限制：
-不能更新为其他监听器的default_pool。
-不能更新为其他监听器的关联的转发策略所使用的pool。
-default_pool_id对应的后端云服务器组的protocol和监听器的protocol有如下关系：
-监听器的protocol为TCP时，后端云服务器组的protocol必须为TCP。
-监听器的protocol为UDP时，后端云服务器组的protocol必须为UDP。
-监听器的protocol为HTTP或TERMINATED_HTTPS时，后端云服务器组的protocol必须为HTTP。
-*/
-func (self *SElbListener) Sync(ctx context.Context, listener *cloudprovider.SLoadbalancerListenerCreateOptions) error {
-	return self.lb.region.UpdateLoadBalancerListener(self.GetId(), listener)
+func (self *SElbListener) ChangeScheduler(ctx context.Context, opts *cloudprovider.ChangeListenerSchedulerOptions) error {
+	return cloudprovider.ErrNotSupported
+}
+
+func (self *SElbListener) SetHealthCheck(ctx context.Context, opts *cloudprovider.ListenerHealthCheckOptions) error {
+	return cloudprovider.ErrNotSupported
 }
 
 func (self *SElbListener) Delete(ctx context.Context) error {

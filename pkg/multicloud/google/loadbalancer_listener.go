@@ -458,8 +458,12 @@ func (self *SLoadbalancerListener) Stop() error {
 	return cloudprovider.ErrNotSupported
 }
 
-func (self *SLoadbalancerListener) Sync(ctx context.Context, listener *cloudprovider.SLoadbalancerListenerCreateOptions) error {
-	return cloudprovider.ErrNotSupported
+func (self *SLoadbalancerListener) ChangeScheduler(ctx context.Context, opts *cloudprovider.ChangeListenerSchedulerOptions) error {
+	return cloudprovider.ErrNotImplemented
+}
+
+func (self *SLoadbalancerListener) SetHealthCheck(ctx context.Context, opts *cloudprovider.ListenerHealthCheckOptions) error {
+	return cloudprovider.ErrNotImplemented
 }
 
 func (self *SLoadbalancerListener) Delete(ctx context.Context) error {

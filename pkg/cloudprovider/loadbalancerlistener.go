@@ -35,6 +35,26 @@ type SLoadbalancerListenerCreateOptions struct {
 	BackendConnectTimeout int
 	BackendIdleTimeout    int
 
+	ListenerHealthCheckOptions
+
+	StickySession              string
+	StickySessionCookie        string
+	StickySessionType          string
+	StickySessionCookieTimeout int
+
+	BackendServerPort int
+	XForwardedFor     bool
+	Gzip              bool
+
+	TLSCipherPolicy string
+}
+
+type ChangeListenerSchedulerOptions struct {
+	Scheduler                  string
+	StickySessionCookieTimeout int
+}
+
+type ListenerHealthCheckOptions struct {
 	HealthCheckReq string
 	HealthCheckExp string
 
@@ -48,17 +68,6 @@ type SLoadbalancerListenerCreateOptions struct {
 
 	HealthCheckRise int
 	HealthCheckFail int
-
-	StickySession              string
-	StickySessionCookie        string
-	StickySessionType          string
-	StickySessionCookieTimeout int
-
-	BackendServerPort int
-	XForwardedFor     bool
-	Gzip              bool
-
-	TLSCipherPolicy string
 }
 
 type SLoadbalancerListenerRule struct {

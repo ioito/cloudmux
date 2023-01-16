@@ -355,15 +355,49 @@ func (listerner *SLoadbalancerHTTPListener) Stop() error {
 	return listerner.lb.region.stopListener(listerner.ListenerPort, listerner.lb.LoadBalancerId)
 }
 
-func (region *SRegion) SyncLoadbalancerHTTPListener(lb *SLoadbalancer, listener *cloudprovider.SLoadbalancerListenerCreateOptions) error {
-	params := region.constructBaseCreateListenerParams(lb, listener)
-	params = region.constructHTTPCreateListenerParams(params, listener)
-	_, err := region.lbRequest("SetLoadBalancerHTTPListenerAttribute", params)
+func (self *SLoadbalancerHTTPListener) ChangeScheduler(ctx context.Context, opts *cloudprovider.ChangeListenerSchedulerOptions) error {
+	params := map[string]string{
+		"LoadBalancerId": self.lb.LoadBalancerId,
+		"ListenerPort":   fmt.Sprintf("%d", self.ListenerPort),
+		"Scheduler":      opts.Scheduler,
+	}
+	_, err := self.lb.region.lbRequest("SetLoadBalancerHTTPListenerAttribute", params)
 	return err
 }
 
-func (listerner *SLoadbalancerHTTPListener) Sync(ctx context.Context, lblis *cloudprovider.SLoadbalancerListenerCreateOptions) error {
-	return listerner.lb.region.SyncLoadbalancerHTTPListener(listerner.lb, lblis)
+func (self *SLoadbalancerHTTPListener) SetHealthCheck(ctx context.Context, opts *cloudprovider.ListenerHealthCheckOptions) error {
+	params := map[string]string{
+		"LoadBalancerId":    self.lb.LoadBalancerId,
+		"ListenerPort":      fmt.Sprintf("%d", self.ListenerPort),
+		"HealthCheckSwitch": "off",
+	}
+	if opts.HealthCheck == api.LB_BOOL_ON {
+		params["HealthCheckSwitch"] = "on"
+		if len(opts.HealthCheckDomain) > 0 {
+			params["HealthCheckDomain"] = opts.HealthCheckDomain
+		}
+
+		if len(opts.HealthCheckHttpCode) > 0 {
+			params["HealthCheckHttpCode"] = opts.HealthCheckHttpCode
+		}
+
+		if len(opts.HealthCheckURI) > 0 {
+			params["HealthCheckURI"] = opts.HealthCheckURI
+		}
+
+		if opts.HealthCheckRise >= 2 && opts.HealthCheckRise <= 10 {
+			params["HealthyThreshold"] = fmt.Sprintf("%d", opts.HealthCheckRise)
+		}
+
+		if opts.HealthCheckFail >= 2 && opts.HealthCheckFail <= 10 {
+			params["UnhealthyThreshold"] = fmt.Sprintf("%d", opts.HealthCheckFail)
+		}
+		if opts.HealthCheckInterval >= 1 && opts.HealthCheckInterval <= 50 {
+			params["healthCheckInterval"] = fmt.Sprintf("%d", opts.HealthCheckInterval)
+		}
+	}
+	_, err := self.lb.region.lbRequest("SetLoadBalancerHTTPListenerAttribute", params)
+	return err
 }
 
 func (listerner *SLoadbalancerHTTPListener) GetProjectId() string {
