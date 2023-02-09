@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"yunion.io/x/jsonutils"
 	"yunion.io/x/pkg/errors"
@@ -183,6 +184,12 @@ func (cp *ProviderConfig) AdaptiveTimeoutHttpClient() *http.Client {
 	return client
 }
 
+func (cp *ProviderConfig) GetTimeoutHttpClient(timeout time.Duration) *http.Client {
+	client := httputils.GetTimeoutClient(timeout)
+	httputils.SetClientProxyFunc(client, cp.ProxyFunc)
+	return client
+}
+
 type SProviderInfo struct {
 	Name    string
 	Url     string
@@ -253,6 +260,8 @@ type ICloudProvider interface {
 	GetSysInfo() (jsonutils.JSONObject, error)
 	GetVersion() string
 	GetIamLoginUrl() string
+
+	GetBilling(ctx context.Context, opts *SBillingOptions) (SBillingInfo, error)
 
 	GetIRegions() []ICloudRegion
 	GetIProjects() ([]ICloudProject, error)
@@ -479,6 +488,10 @@ func (self *SBaseProvider) GetOnPremiseIRegion() (ICloudRegion, error) {
 
 func (self *SBaseProvider) GetIamLoginUrl() string {
 	return ""
+}
+
+func (self *SBaseProvider) GetBilling(ctx context.Context, opts *SBillingOptions) (*SBillingInfo, error) {
+	return nil, errors.Wrapf(ErrNotImplemented, "GetBilling")
 }
 
 func (self *SBaseProvider) IsClouduserSupportPassword() bool {

@@ -1,18 +1,4 @@
 // Copyright 2019 Yunion
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-// Copyright 2019 Yunion
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -81,6 +67,10 @@ type SAzureClient struct {
 
 	ressourceGroups []SResourceGroup
 
+	billAccessKey    string
+	enrollmentNumber string
+	billScope        string
+
 	regions  []SRegion
 	iBuckets []cloudprovider.ICloudBucket
 
@@ -129,6 +119,13 @@ func (cfg *AzureClientConfig) Debug(debug bool) *AzureClientConfig {
 	return cfg
 }
 
+func (self *SAzureClient) WithBillOptions(accessKey, enrollmentNumber, billScope string) *SAzureClient {
+	self.billAccessKey = accessKey
+	self.enrollmentNuber = enrollmentNumber
+	self.billScope = billScope
+	return self
+}
+
 func NewAzureClient(cfg *AzureClientConfig) (*SAzureClient, error) {
 	client := SAzureClient{
 		AzureClientConfig: cfg,
@@ -154,6 +151,24 @@ func NewAzureClient(cfg *AzureClientConfig) (*SAzureClient, error) {
 	return &client, nil
 }
 
+func (self *SAzureClient) getHttpClient(timeout time.Duration) *http.Client {
+	httpClient := self.cpcfg.AdaptiveTimeoutHttpClient()
+	if timeout > 0 {
+		httpClient = self.cpcfg.GetTimeoutHttpClient(timeout)
+	}
+	transport, _ := httpClient.Transport.(*http.Transport)
+	httpClient.Transport = cloudprovider.GetCheckTransport(transport, func(req *http.Request) (func(resp *http.Response), error) {
+		if self.cpcfg.ReadOnly {
+			if req.Method == "GET" || (req.Method == "POST" && strings.HasSuffix(req.URL.Path, "oauth2/token")) {
+				return nil, nil
+			}
+			return nil, errors.Wrapf(cloudprovider.ErrAccountReadOnly, "%s %s", req.Method, req.URL.Path)
+		}
+		return nil, nil
+	})
+	return httpClient
+}
+
 func (self *SAzureClient) getClient(resource TAzureResource) (*azureAuthClient, error) {
 	_client, ok := self.clientCache[resource]
 	if ok {
@@ -167,17 +182,7 @@ func (self *SAzureClient) getClient(resource TAzureResource) (*azureAuthClient, 
 		return nil, errors.Wrapf(err, "azureenv.EnvironmentFromName(%s)", self.envName)
 	}
 
-	httpClient := self.cpcfg.AdaptiveTimeoutHttpClient()
-	transport, _ := httpClient.Transport.(*http.Transport)
-	httpClient.Transport = cloudprovider.GetCheckTransport(transport, func(req *http.Request) (func(resp *http.Response), error) {
-		if self.cpcfg.ReadOnly {
-			if req.Method == "GET" || (req.Method == "POST" && strings.HasSuffix(req.URL.Path, "oauth2/token")) {
-				return nil, nil
-			}
-			return nil, errors.Wrapf(cloudprovider.ErrAccountReadOnly, "%s %s", req.Method, req.URL.Path)
-		}
-		return nil, nil
-	})
+	httpClient := self.getHttpClient(time.Duration(0))
 	client.Sender = httpClient
 
 	switch resource {

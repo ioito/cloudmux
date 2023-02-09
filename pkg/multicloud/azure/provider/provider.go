@@ -123,18 +123,27 @@ func parseAccount(account, secret string) (tenantId string, appId string, appKey
 
 func (self *SAzureProviderFactory) GetProvider(cfg cloudprovider.ProviderConfig) (cloudprovider.ICloudProvider, error) {
 	tenantId, appId, appKey, subId := parseAccount(cfg.Account, cfg.Secret)
-	if client, err := azure.NewAzureClient(
+	client, err := azure.NewAzureClient(
 		azure.NewAzureClientConfig(
 			cfg.URL, tenantId, appId, appKey,
 		).SubscriptionId(subId).CloudproviderConfig(cfg),
-	); err != nil {
+	)
+	if err != nil {
 		return nil, err
-	} else {
-		return &SAzureProvider{
-			SBaseProvider: cloudprovider.NewBaseProvider(self),
-			client:        client,
-		}, nil
 	}
+	if cfg.Options != nil {
+		info := struct {
+			BalanceKey       string
+			EnrollmentNumber string
+			BillingScope     string
+		}{}
+		cfg.Options.Unmarshal(&info)
+		client = client.WithBillOptions(info.BalanceKey, info.EnrollmentNumber, info.BillingScope)
+	}
+	return &SAzureProvider{
+		SBaseProvider: cloudprovider.NewBaseProvider(self),
+		client:        client,
+	}, nil
 }
 
 func (self *SAzureProviderFactory) GetClientRC(info cloudprovider.SProviderInfo) (map[string]string, error) {
@@ -285,4 +294,8 @@ func (self *SAzureProvider) GetSamlEntityId() string {
 
 func (self *SAzureProvider) GetMetrics(opts *cloudprovider.MetricListOptions) ([]cloudprovider.MetricValues, error) {
 	return self.client.GetMetrics(opts)
+}
+
+func (self *SAzureProvider) GetBilling(ctx context.Context, opts *cloudprovider.SBillingOptions) (*cloudprovider.SBillingInfo, error) {
+	return self.client.GetBilling(ctx, opts)
 }

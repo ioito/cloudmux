@@ -32,14 +32,17 @@ import (
 )
 
 type BaseOptions struct {
-	Debug          bool   `help:"debug mode"`
-	DirectoryID    string `help:"Azure account Directory ID/Tenant ID" default:"$AZURE_DIRECTORY_ID" metavar:"AZURE_DIRECTORY_ID"`
-	SubscriptionID string `help:"Azure account subscription ID" default:"$AZURE_SUBSCRIPTION_ID" metavar:"AZURE_SUBSCRIPTION_ID"`
-	ApplicationID  string `help:"Azure application ID" default:"$AZURE_APPLICATION_ID" metavar:"AZURE_APPLICATION_ID"`
-	ApplicationKey string `help:"Azure application key" default:"$AZURE_APPLICATION_KEY" metavar:"AZURE_APPLICATION_KEY"`
-	RegionId       string `help:"RegionId" default:"$AZURE_REGION_ID" metavar:"AZURE_REGION_ID"`
-	CloudEnv       string `help:"Cloud Environment" default:"$AZURE_CLOUD_ENV" choices:"AzureGermanCloud|AzureChinaCloud|AzureUSGovernmentCloud|AzurePublicCloud" metavar:"AZURE_CLOUD_ENV"`
-	SUBCOMMAND     string `help:"azurecli subcommand" subcommand:"true"`
+	Debug            bool   `help:"debug mode"`
+	DirectoryID      string `help:"Azure account Directory ID/Tenant ID" default:"$AZURE_DIRECTORY_ID" metavar:"AZURE_DIRECTORY_ID"`
+	SubscriptionID   string `help:"Azure account subscription ID" default:"$AZURE_SUBSCRIPTION_ID" metavar:"AZURE_SUBSCRIPTION_ID"`
+	ApplicationID    string `help:"Azure application ID" default:"$AZURE_APPLICATION_ID" metavar:"AZURE_APPLICATION_ID"`
+	ApplicationKey   string `help:"Azure application key" default:"$AZURE_APPLICATION_KEY" metavar:"AZURE_APPLICATION_KEY"`
+	RegionId         string `help:"RegionId" default:"$AZURE_REGION_ID" metavar:"AZURE_REGION_ID"`
+	CloudEnv         string `help:"Cloud Environment" default:"$AZURE_CLOUD_ENV" choices:"AzureGermanCloud|AzureChinaCloud|AzureUSGovernmentCloud|AzurePublicCloud" metavar:"AZURE_CLOUD_ENV"`
+	BillAccessKey    string `help:"BillAccessKey" default:"$AZURE_BILL_ACCESS_KEY" metavar:"AZURE_BILL_ACCESS_KEY"`
+	BillScope        string `help:"BillScope" choices:"all|managed" default:"$AZURE_BILL_SCOPE" metavar:"AZURE_BILL_SCOPE"`
+	EnrollmentNumber string `help:"EnrollmentNumber" default:"$AZURE_ENROLLMENT_NUMBER" metavar:"AZURE_ENROLLMENT_NUMBER"`
+	SUBCOMMAND       string `help:"azurecli subcommand" subcommand:"true"`
 }
 
 func getSubcommandParser() (*structarg.ArgumentParser, error) {
@@ -117,6 +120,9 @@ func newClient(options *BaseOptions) (*azure.SRegion, error) {
 				},
 			),
 	)
+	if len(options.BillAccessKey) > 0 && len(options.EnrollmentNumber) > 0 {
+		cli = cli.WithBillOptions(options.BillAccessKey, options.EnrollmentNumber)
+	}
 
 	if err != nil {
 		return nil, err
