@@ -1,8 +1,13 @@
 name: Cloudmux Docker Image
 
 on:
-  push
-
+  push:
+  workflow_call:
+    secrets:
+      ACR_USERNAME:
+        required: true
+      ACR_PASSWORD:
+        required: true
 
 jobs:
   build_cloudmux:
