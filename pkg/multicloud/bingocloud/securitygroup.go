@@ -126,10 +126,6 @@ func (self *SSecurityGroup) GetRules() ([]cloudprovider.SecurityRule, error) {
 	return ret, nil
 }
 
-func (self *SSecurityGroup) GetVpcId() string {
-	return api.NORMAL_VPC_ID
-}
-
 func (self *SSecurityGroup) GetStatus() string {
 	return api.SECGROUP_STATUS_READY
 }

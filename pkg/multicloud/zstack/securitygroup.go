@@ -22,7 +22,6 @@ import (
 	"yunion.io/x/jsonutils"
 	"yunion.io/x/pkg/util/secrules"
 
-	api "yunion.io/x/cloudmux/pkg/apis/compute"
 	"yunion.io/x/cloudmux/pkg/cloudprovider"
 	"yunion.io/x/cloudmux/pkg/multicloud"
 )
@@ -83,7 +82,7 @@ func (region *SRegion) GetSecurityGroups(secgroupId string, instanceId string, n
 }
 
 func (self *SSecurityGroup) GetVpcId() string {
-	return api.NORMAL_VPC_ID
+	return ""
 }
 
 func (self *SSecurityGroup) GetId() string {
